@@ -22,7 +22,7 @@ void setup() {
 void loop() {
 
   if(detectLeader(irr)) {
-    data = mColor;
+    data = analyzeSignal(irr);
     Serial.write(data);
     pirr = data;
   }else {
@@ -60,14 +60,16 @@ boolean detectLeader(const int irr) {
 byte analyzeSignal(const int irr) {
   while(!digitalRead(irr));
   time = micros();
-  while(digitalRead(irr));
-  dt = micros() - time;
+  while(digitalRead(irr)) {
+    dt = micros() - time;
+    if (dt > 5000) break;
+  }
   
   if(dt > 500 && dt < 700) {
     return 0x00 | analyzeSignal(irr) << 1;
   }else if(dt > 1600 && dt < 1800) {
     return 0x01 | analyzeSignal(irr) << 1;
-  }else if(dt > 10000) {
+  }else if(dt > 5000) {
     return signal;
   }
 }
